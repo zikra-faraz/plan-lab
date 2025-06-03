@@ -83,9 +83,9 @@ export async function getOrganizationUsers(orgId: string) {
       organizationId: orgId,
     });
 
-  const userIds = organizationMemberships?.data?.map(
-    (membership) => membership?.publicUserData?.userId
-  );
+  const userIds = organizationMemberships?.data
+    ?.map((membership) => membership?.publicUserData?.userId)
+    .filter((id): id is string => Boolean(id));
 
   const users = await db.user.findMany({
     where: {
