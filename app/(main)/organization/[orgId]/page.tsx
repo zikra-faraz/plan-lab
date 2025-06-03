@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { OrganizationSlugType } from "@/types/Organization";
+
 import { getOrganization } from "@/actions/Organization";
 import OrgSwitcher from "@/components/org-switcher";
 import ProjectList from "./_components/project-list";
 import UserIssues from "./_components/user-issues";
-export default async function Organization({ params }: OrganizationSlugType) {
-  const { orgId } = params;
+export default async function Organization({ params }) {
+  const { orgId } = await params;
   const { userId } = await auth();
   const response = await getOrganization(orgId);
   if (!response) {
