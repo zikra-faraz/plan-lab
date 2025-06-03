@@ -78,12 +78,13 @@ export async function getOrganizationUsers(orgId: string) {
 
   const { organizations } = await clerkClient();
 
-  const organizationMemberships = organizations.getOrganizationMembershipList({
-    organizationId: orgId,
-  });
+  const organizationMemberships =
+    await organizations.getOrganizationMembershipList({
+      organizationId: orgId,
+    });
 
   const userIds = organizationMemberships?.data?.map(
-    (membership) => membership.publicUserData.userId
+    (membership) => membership?.publicUserData?.userId
   );
 
   const users = await db.user.findMany({
