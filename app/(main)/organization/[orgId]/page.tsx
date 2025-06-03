@@ -6,7 +6,7 @@ import OrgSwitcher from "@/components/org-switcher";
 import ProjectList from "./_components/project-list";
 import UserIssues from "./_components/user-issues";
 export default async function Organization({ params }: OrganizationSlugType) {
-  const { orgId } = await params;
+  const { orgId } = params;
   const { userId } = await auth();
   const response = await getOrganization(orgId);
   if (!response) {
