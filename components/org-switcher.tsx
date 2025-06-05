@@ -27,7 +27,9 @@ const OrgSwitcher = () => {
               hidePersonal
               // @ts-ignore
               createOrganizationMode={
-                pathname === "/onboarding" ? "navigation" : "modal"
+                (pathname === "/onboarding"
+                  ? "navigation"
+                  : "modal") as "navigation"
               }
               afterCreateOrganizationUrl="/organization/:slug"
               afterSelectOrganizationUrl="/organization/:slug"
