@@ -3,7 +3,7 @@ import ThemeToggle from "./ThemeToggle";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { PenBox } from "lucide-react";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import Image from "next/image";
 import UserMenu from "@/components/user-menu";
 import { checkUser } from "@/lib/checkUser";

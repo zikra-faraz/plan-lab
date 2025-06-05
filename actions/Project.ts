@@ -40,6 +40,8 @@ export async function createProject(data: ProjectSchemaType) {
 }
 
 export async function getProject(projectId: string) {
+  console.log(projectId);
+
   const { userId, orgId } = await auth();
   if (!userId || !orgId) {
     throw new Error("Unauthorized");
@@ -63,6 +65,7 @@ export async function getProject(projectId: string) {
       },
     },
   });
+  console.log(project);
 
   if (!project) {
     throw new Error("Project not found");

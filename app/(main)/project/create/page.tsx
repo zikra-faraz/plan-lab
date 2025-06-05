@@ -40,14 +40,8 @@ const ProjectCreate = () => {
     fn: createProjectFn,
   } = useFetch<Project>(createProject, {} as Project);
 
-  useEffect(() => {
-    // console.log(project);
+  // console.log(project);
 
-    if (project) {
-      toast.success("Project created successfully");
-      router.push(`/project/${project?.id}`);
-    }
-  }, [loading]);
   if (!isOrgLoaded || !isUserLoaded) return null;
   if (!isAdmin) {
     return (
@@ -67,7 +61,13 @@ const ProjectCreate = () => {
       alert("Only organization admins can create projects");
       return;
     }
-    createProjectFn(data);
+    try {
+      const newProject = await createProject(data);
+      toast.success("Project created successfully");
+      router.push(`/project/${newProject.id}`);
+    } catch (err: any) {
+      toast.error(err?.message || "Something went wrong");
+    }
   };
 
   return (
