@@ -2,15 +2,35 @@
 
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { IssueStatus, IssuePriority } from "@prisma/client";
 
-export async function createIssue(projectId: string, data) {
+type CreateIssueData = {
+  title: string;
+  description?: string;
+  status: IssueStatus;
+  priority: IssuePriority;
+  sprintId?: string;
+  assigneeId?: string;
+};
+type UpdateIssueInput = {
+  id: string;
+  status: IssueStatus;
+  order: number;
+};
+type UpdateIssueData = {
+  status: IssueStatus;
+  priority: IssuePriority;
+};
+export async function createIssue(projectId: string, data: CreateIssueData) {
   const { userId, orgId } = await auth();
   if (!userId || !orgId) {
     throw new Error("Unauthorized");
   }
 
   let user = await db.user.findUnique({ where: { clerkUserId: userId } });
-
+  if (!user) {
+    throw new Error("User not found");
+  }
   const lastIssue = await db.issue.findFirst({
     where: { projectId, status: data.status },
     orderBy: { order: "desc" },
@@ -39,7 +59,7 @@ export async function createIssue(projectId: string, data) {
 
   return issue;
 }
-export async function getIssuesForSprint(sprintId) {
+export async function getIssuesForSprint(sprintId: string) {
   const { userId, orgId } = await auth();
 
   if (!userId || !orgId) {
@@ -63,7 +83,7 @@ export async function getIssuesForSprint(sprintId) {
 // All operations succeed and are saved to the database.
 
 // Or any one fails, and everything is rolled back (like nothing ever happened).
-export async function updateIssueOrder(updatedIssues) {
+export async function updateIssueOrder(updatedIssues: UpdateIssueInput[]) {
   const { userId, orgId } = await auth();
 
   if (!userId || !orgId) {
@@ -87,7 +107,7 @@ export async function updateIssueOrder(updatedIssues) {
   return { success: true };
 }
 
-export async function deleteIssue(issueId) {
+export async function deleteIssue(issueId: string) {
   const { userId, orgId } = await auth();
 
   if (!userId || !orgId) {
@@ -111,10 +131,7 @@ export async function deleteIssue(issueId) {
     throw new Error("Issue not found");
   }
 
-  if (
-    issue.reporterId !== user.id &&
-    !issue.project.adminIds.includes(user.id)
-  ) {
+  if (issue.reporterId !== user.id) {
     throw new Error("You don't have permission to delete this issue");
   }
 
@@ -123,7 +140,7 @@ export async function deleteIssue(issueId) {
   return { success: true };
 }
 
-export async function updateIssue(issueId, data) {
+export async function updateIssue(issueId: string, data: UpdateIssueData) {
   const { userId, orgId } = await auth();
 
   if (!userId || !orgId) {
@@ -158,11 +175,14 @@ export async function updateIssue(issueId, data) {
 
     return updatedIssue;
   } catch (error) {
-    throw new Error("Error updating issue: " + error.message);
+    if (error instanceof Error) {
+      throw new Error("Error updating issue: " + error.message);
+    }
+    throw new Error("Unknown error occurred");
   }
 }
 
-export async function getUserIssues(userId) {
+export async function getUserIssues(userId: string) {
   const { orgId } = await auth();
   if (!userId || !orgId) {
     throw new Error("No user id or organization id found");

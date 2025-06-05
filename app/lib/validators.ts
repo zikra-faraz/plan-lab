@@ -23,16 +23,15 @@ export type ProjectSchemaType = z.infer<typeof projectSchema>;
 //   description?: string;
 // };
 
-export const sprintSchema = z
-  .object({
-    name: z.string().min(1, "Sprint name is required"),
-    startDate: z.date().optional(),
-    endDate: z.date().optional(),
-  })
-  .refine((data) => data.startDate && data.endDate, {
-    message: "Start and end dates are required",
-    path: ["startDate"], // show the error on the startDate field
-  });
+export const sprintSchema = z.object({
+  name: z.string().min(1, "Sprint name is required"),
+  startDate: z.date(),
+  endDate: z.date(),
+});
+// .refine((data) => data.startDate && data.endDate, {
+//   message: "Start and end dates are required",
+//   path: ["startDate"], // show the error on the startDate field
+// });
 
 export type sprintSchemaType = z.infer<typeof sprintSchema>;
 

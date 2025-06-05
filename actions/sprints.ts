@@ -1,6 +1,7 @@
 "use server";
 import { sprintSchemaType } from "@/app/lib/validators";
 import { db } from "@/lib/prisma";
+import { SprintStatus, IssueStatus, IssuePriority } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
 
 export async function createSprint(projectId: string, data: sprintSchemaType) {
@@ -28,7 +29,10 @@ export async function createSprint(projectId: string, data: sprintSchemaType) {
   return sprint;
 }
 
-export async function updateSprintStatus(sprintId: string, newStatus: string) {
+export async function updateSprintStatus(
+  sprintId: string,
+  newStatus: SprintStatus
+) {
   const { userId, orgId, orgRole } = await auth();
   if (!userId || !orgId) {
     throw new Error("Unauthorized");
@@ -63,6 +67,9 @@ export async function updateSprintStatus(sprintId: string, newStatus: string) {
 
     return { success: true, sprint: updatedSprint };
   } catch (error) {
-    throw new Error(error?.message);
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Unknown error occurred");
   }
 }

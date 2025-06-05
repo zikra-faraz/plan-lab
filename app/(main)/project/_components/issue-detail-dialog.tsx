@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { ExternalLink } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import statuses from "@/data/status";
+import statuses from "@/data/status.json";
 import { useState, useEffect } from "react";
 import { useOrganization, useUser } from "@clerk/nextjs";
 import useFetch from "@/hooks/useFetch";
@@ -24,16 +24,26 @@ import MDEditor from "@uiw/react-md-editor";
 import UserAvatar from "./user-avatar";
 import { Button } from "@/components/ui/button";
 import { BarLoader } from "react-spinners";
+import { Issue } from "@/types/modelType";
+import { SprintStatus, IssueStatus, IssuePriority } from "@prisma/client";
 
 const priorityOptions = ["LOW", "MEDIUM", "HIGH", "URGENT"];
-const issueDetailDialog = ({
+type issueDetailDialogProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  issue: Issue;
+  onDelete?: () => void; // optional with default to empty fn
+  onUpdate?: (issue: Issue) => void; // optional with default to empty fn
+  borderCol?: string;
+};
+const IssueDetailDialog = ({
   isOpen,
   onClose,
   issue,
   onDelete = () => {},
-  onUpdate = () => {},
+  onUpdate = (_: Issue) => {},
   borderCol = "",
-}) => {
+}: issueDetailDialogProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const [status, setStatus] = useState(issue.status);
@@ -46,25 +56,25 @@ const issueDetailDialog = ({
     error: deleteError,
     fn: deleteIssueFn,
     data: deleted,
-  } = useFetch(deleteIssue);
+  } = useFetch(deleteIssue, { success: false });
 
   const {
     loading: updateLoading,
     error: updateError,
     fn: updateIssueFn,
     data: updated,
-  } = useFetch(updateIssue);
+  } = useFetch(updateIssue, {} as Issue);
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this issue?")) {
       deleteIssueFn(issue.id);
     }
   };
-  const handleStatusChange = async (newStatus) => {
+  const handleStatusChange = async (newStatus: IssueStatus) => {
     setStatus(newStatus);
     updateIssueFn(issue.id, { status: newStatus, priority });
   };
 
-  const handlePriorityChange = async (newPriority) => {
+  const handlePriorityChange = async (newPriority: IssuePriority) => {
     setPriority(newPriority);
     updateIssueFn(issue.id, { status, priority: newPriority });
   };
@@ -78,7 +88,7 @@ const issueDetailDialog = ({
     }
   }, [deleted, updated, deleteLoading, updateLoading]);
   const canChange =
-    user.id === issue.reporter.clerkUserId || membership.role === "org:admin";
+    user?.id === issue.reporter.clerkUserId || membership?.role === "org:admin";
   const handleGoToProject = () => {
     router.push(`/project/${issue.projectId}?sprint=${issue.sprintId}`);
   };
@@ -172,4 +182,4 @@ const issueDetailDialog = ({
   );
 };
 
-export default issueDetailDialog;
+export default IssueDetailDialog;

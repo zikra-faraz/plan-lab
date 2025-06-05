@@ -16,7 +16,7 @@ export default function DeleteProject({ projectId }: { projectId: string }) {
     error,
     fn: deleteProjectFn,
     data: deleted,
-  } = useFetch(deleteProject);
+  } = useFetch(deleteProject, { success: false });
   const isAdmin = membership?.role === "org:admin";
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this project?")) {

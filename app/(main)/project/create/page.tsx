@@ -38,7 +38,7 @@ const ProjectCreate = () => {
     error,
     data: project,
     fn: createProjectFn,
-  } = useFetch<Project>(createProject);
+  } = useFetch<Project>(createProject, {} as Project);
 
   useEffect(() => {
     // console.log(project);

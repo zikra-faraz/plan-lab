@@ -19,6 +19,8 @@ import "react-day-picker/style.css";
 import useFetch from "@/hooks/useFetch";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Sprint } from "@/types/modelType";
+import { sprintSchemaType } from "@/app/lib/validators";
 
 export default function SprintCreationForm({
   projectTitle,
@@ -37,8 +39,10 @@ export default function SprintCreationForm({
     to: addDays(new Date(), 14),
   });
   const router = useRouter();
-  const { loading: createSprintLoading, fn: createSprintFn } =
-    useFetch(createSprint);
+  const { loading: createSprintLoading, fn: createSprintFn } = useFetch(
+    createSprint,
+    {} as Sprint
+  );
   // control is used when using third party  packags lik here reactt day picker
   const {
     register,
@@ -49,11 +53,11 @@ export default function SprintCreationForm({
     resolver: zodResolver(sprintSchema),
     defaultValues: {
       name: `${projectKey}-${sprintKey}`,
-      startDate: dateRange.from,
-      endDate: dateRange.to,
+      startDate: dateRange.from ?? new Date(),
+      endDate: dateRange.to ?? new Date(),
     },
   });
-  const onSubmit = async (data) => {
+  const onSubmit = async (data: sprintSchemaType) => {
     await createSprintFn(projectId, {
       ...data,
       startDate: dateRange.from,

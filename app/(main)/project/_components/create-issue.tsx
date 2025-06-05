@@ -29,8 +29,27 @@ import { Controller, useForm } from "react-hook-form";
 import { BarLoader } from "react-spinners";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
+import { Issue, IssuePriority } from "@prisma/client";
+import { User } from "@/types/modelType";
+type CreateIssueDrawerProps = {
+  isOpen: boolean; // true or false for drawer open state
+  onClose: () => void; // function to close drawer
+  sprintId?: string; // optional sprint id
+  status: string; // status string (TODO, IN_PROGRESS, etc.)
+  projectId: string; // project id string
+  onIssueCreated: () => void; // callback when issue is created
+  orgId: string; // organization id string
+};
 
-const CreateIssueDrawer = ({
+type FormDataCreateIssue = {
+  title: string;
+  description?: string;
+
+  priority: IssuePriority;
+
+  assigneeId?: string;
+};
+const CreateIssueDrawer: React.FC<CreateIssueDrawerProps> = ({
   isOpen,
   onClose,
   sprintId,
@@ -53,18 +72,18 @@ const CreateIssueDrawer = ({
     fn: createIssueFn,
     error,
     data: newIssue,
-  } = useFetch(createIssue);
+  } = useFetch(createIssue, {} as Issue);
   const {
     loading: usersLoading,
     fn: fetchUsers,
     data: users,
-  } = useFetch(getOrganizationUsers);
+  } = useFetch(getOrganizationUsers, [] as User[]);
   useEffect(() => {
     if (isOpen && orgId) {
       fetchUsers(orgId);
     }
   }, [isOpen, orgId]);
-  const onSubmit = async (data) => {
+  const onSubmit = async (data: FormDataCreateIssue) => {
     await createIssueFn(projectId, {
       ...data,
       status,
@@ -76,7 +95,7 @@ const CreateIssueDrawer = ({
       reset();
       onClose();
       onIssueCreated();
-      toast.success("Issue added successfully");
+      // toast.success("Issue added successfully");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newIssue, createIssueLoading]);

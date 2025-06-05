@@ -5,7 +5,11 @@ import { getOrganization } from "@/actions/Organization";
 import OrgSwitcher from "@/components/org-switcher";
 import ProjectList from "./_components/project-list";
 import UserIssues from "./_components/user-issues";
-export default async function Organization({ params }) {
+export default async function Organization({
+  params,
+}: {
+  params: Promise<{ orgId: string }>;
+}) {
   const { orgId } = await params;
   const { userId } = await auth();
   const response = await getOrganization(orgId);
@@ -33,7 +37,7 @@ export default async function Organization({ params }) {
           <ProjectList orgId={response.id} />
         </div>
         <div className="mt-8">
-          <UserIssues userId={userId} />
+          <UserIssues userId={userId!} />
         </div>
       </div>
     </>

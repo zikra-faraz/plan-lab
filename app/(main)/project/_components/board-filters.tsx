@@ -11,12 +11,17 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { Issue, User } from "@/types/modelType";
 
 const priorities = ["LOW", "MEDIUM", "HIGH", "URGENT"];
+type BoardFiltersProps = {
+  issues: Issue[];
+  onFilterChange: (filteredIssues: Issue[]) => void;
+};
 
-const BoardFilters = ({ issues, onFilterChange }) => {
+const BoardFilters = ({ issues, onFilterChange }: BoardFiltersProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedAssignees, setSelectedAssignees] = useState([]);
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
   const [selectedPriority, setSelectedPriority] = useState("");
   //An array of unique assignee objects from the issues list.
   //item	The current value you're checking (like a single assignee)
@@ -25,20 +30,26 @@ const BoardFilters = ({ issues, onFilterChange }) => {
   const assignees = issues
     .map((issue) => issue.assignee)
     .filter(
+      (assignee): assignee is User =>
+        assignee !== null && assignee !== undefined
+    ) // removes nulls + tells TS it’s not null
+    .filter(
       (item, index, self) => index === self.findIndex((t) => t.id === item.id)
     );
+
   useEffect(() => {
     const filteredIssues = issues.filter(
       (issue) =>
         issue.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
         (selectedAssignees.length === 0 ||
-          selectedAssignees.includes(issue.assignee?.id)) &&
+          (issue.assignee?.id &&
+            selectedAssignees.includes(issue.assignee.id))) &&
         (selectedPriority === "" || issue.priority === selectedPriority)
     );
     onFilterChange(filteredIssues);
   }, [searchTerm, selectedAssignees, selectedPriority, issues]);
 
-  const toggleAssignee = (assigneeId) => {
+  const toggleAssignee = (assigneeId: string) => {
     setSelectedAssignees((prev) =>
       prev.includes(assigneeId)
         ? prev.filter((id) => id !== assigneeId)
@@ -81,8 +92,8 @@ const BoardFilters = ({ issues, onFilterChange }) => {
                   onClick={() => toggleAssignee(assignee.id)}
                 >
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={assignee.imageUrl} />
-                    <AvatarFallback>{assignee.name[0]}</AvatarFallback>
+                    <AvatarImage src={assignee.imageUrl ?? undefined} />
+                    <AvatarFallback>{assignee.name?.[0]}</AvatarFallback>
                   </Avatar>
                 </div>
               );

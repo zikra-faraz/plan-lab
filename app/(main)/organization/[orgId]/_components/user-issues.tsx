@@ -3,14 +3,18 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Suspense } from "react";
 import IssueCard from "@/app/(main)/project/_components/issue-card";
-const UserIssues = async ({ userId }) => {
+import { Issue } from "@/types/modelType";
+type UserIssuesProps = {
+  userId: string;
+};
+const UserIssues = async ({ userId }: UserIssuesProps) => {
   const issues = await getUserIssues(userId);
   if (issues.length === 0) {
     return null;
   }
 
   const assignedIssues = issues.filter(
-    (issue) => issue.assignee.clerkUserId === userId
+    (issue) => issue?.assignee?.clerkUserId === userId
   );
   const reportedIssues = issues.filter(
     (issue) => issue.reporter.clerkUserId === userId
@@ -19,7 +23,7 @@ const UserIssues = async ({ userId }) => {
     <div>
       <h1 className="text-4xl font-bold gradient-title mb-4">My Issues</h1>
 
-      <Tabs defaultValue="assigned" className="w-full">
+      {/* <Tabs defaultValue="assigned" className="w-full">
         <TabsList>
           <TabsTrigger value="assigned">Assigned to You</TabsTrigger>
           <TabsTrigger value="reported">Reported by You</TabsTrigger>
@@ -34,12 +38,15 @@ const UserIssues = async ({ userId }) => {
             <IssueGrid issues={reportedIssues} />
           </Suspense>
         </TabsContent>
-      </Tabs>
+      </Tabs> */}
     </div>
   );
 };
+type IssueGridProps = {
+  issues: Issue[];
+};
 
-function IssueGrid({ issues }) {
+function IssueGrid({ issues }: IssueGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {issues.map((issue) => (

@@ -13,27 +13,33 @@ import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import IssueDetailDialog from "./issue-detail-dialog";
+import { Issue } from "@/types/modelType";
 const priorityColor = {
   LOW: "border-green-600",
   MEDIUM: "border-yellow-300",
   HIGH: "border-orange-400",
   URGENT: "border-red-400",
 };
-
+type IssueCardProps = {
+  issue: Issue;
+  showStatus?: boolean;
+  onDelete?: () => void;
+  onUpdate?: (updated: Issue) => void;
+};
 const IssueCard = ({
   issue,
   showStatus = false,
   onDelete = () => {},
-  onUpdate = () => {},
-}) => {
+  onUpdate = (_: Issue) => {},
+}: IssueCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
-  const onDeleteHandler = (...params) => {
+  const onDeleteHandler = (...params: []) => {
     router.refresh();
     onDelete(...params);
   };
 
-  const onUpdateHandler = (...params) => {
+  const onUpdateHandler = (...params: [Issue]) => {
     router.refresh();
     onUpdate(...params);
   };
@@ -67,7 +73,8 @@ const IssueCard = ({
           </CardFooter>
         </Card>
       </div>
-      {isDialogOpen && (
+      {/* {console.log(isDialogOpen)} */}
+      {
         <IssueDetailDialog
           isOpen={isDialogOpen}
           onClose={() => setIsDialogOpen(false)}
@@ -76,7 +83,7 @@ const IssueCard = ({
           onUpdate={onUpdateHandler}
           borderCol={priorityColor[issue.priority]}
         />
-      )}
+      }
     </>
   );
 };

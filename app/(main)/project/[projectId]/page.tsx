@@ -8,7 +8,11 @@ import SprintBoard from "../_components/sprint-board";
 //   };
 // };
 
-export default async function ProjectPage({ params }) {
+export default async function ProjectPage({
+  params,
+}: {
+  params: Promise<{ projectId: string }>;
+}) {
   const { projectId } = await params;
   const project = await getProject(projectId);
   // console.log(project);

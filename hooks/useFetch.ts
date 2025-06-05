@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-const useFetch = <T>(cb: (...args: any[]) => Promise<T>) => {
-  const [data, setData] = useState<T | undefined>(undefined);
+const useFetch = <T>(cb: (...args: any[]) => Promise<T>, defaultValue: T) => {
+  const [data, setData] = useState<T>(defaultValue);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -15,8 +15,11 @@ const useFetch = <T>(cb: (...args: any[]) => Promise<T>) => {
       setData(response);
       setError(null);
     } catch (error) {
-      setError(error);
-      toast.error(error?.message);
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }

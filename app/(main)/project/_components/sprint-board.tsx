@@ -11,11 +11,20 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import CreateIssueDrawer from "./create-issue";
 import { getIssuesForSprint, updateIssueOrder } from "@/actions/issues";
+import { SprintStatus, IssueStatus, IssuePriority } from "@prisma/client";
 import { BarLoader } from "react-spinners";
 import IssueCard from "./issue-card";
 import BoardFilters from "./board-filters";
+import { Sprint, Issue } from "@/types/modelType";
+import type { DropResult } from "@hello-pangea/dnd";
 
-function reorder(list, startIndex, endIndex) {
+type SprintBoardProps = {
+  sprints: Sprint[];
+  projectId: string;
+  orgId: string;
+};
+
+function reorder<T>(list: T[], startIndex: number, endIndex: number): T[] {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
@@ -23,12 +32,16 @@ function reorder(list, startIndex, endIndex) {
   return result;
 }
 
-export default function SprintBoard({ sprints, projectId, orgId }) {
+export default function SprintBoard({
+  sprints,
+  projectId,
+  orgId,
+}: SprintBoardProps) {
   const [currentSprint, setCurrentSprint] = useState(
-    sprints.find((spr) => spr.status === "Active") || sprints[0]
+    sprints.find((spr) => spr.status === "ACTIVE") || sprints[0]
   );
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState("");
 
   const handleAddIssue = (status: string) => {
     setSelectedStatus(status);
@@ -40,9 +53,10 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
     fn: fetchIssues,
     data: issues,
     setData: setIssues,
-  } = useFetch(getIssuesForSprint);
-  const [filteredIssues, setFilteredIssues] = useState(issues);
-  const handleFilterChange = (newFilteredIssues) => {
+  } = useFetch(getIssuesForSprint, [] as Issue[]);
+  // console.log(issues);
+  const [filteredIssues, setFilteredIssues] = useState<Issue[]>(issues ?? []);
+  const handleFilterChange = (newFilteredIssues: Issue[]) => {
     setFilteredIssues(newFilteredIssues);
   };
   useEffect(() => {
@@ -57,8 +71,8 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
     fn: updateIssueOrderFn,
     loading: updateIssuesLoading,
     error: updateIssuesError,
-  } = useFetch(updateIssueOrder);
-  const onDragEnd = async (result) => {
+  } = useFetch(updateIssueOrder, { success: false });
+  const onDragEnd = async (result: DropResult) => {
     if (currentSprint.status === "PLANNED") {
       toast.warning("Start the sprint to update board");
       return;
@@ -80,7 +94,7 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
       return;
     }
 
-    const newOrderedData = [...issues];
+    const newOrderedData: Issue[] = [...(issues ?? [])];
 
     // source and destination list
     const sourceList = newOrderedData.filter(
@@ -106,7 +120,7 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
       const [movedCard] = sourceList.splice(source.index, 1);
 
       // assign the new list id to the moved card
-      movedCard.status = destination.droppableId;
+      movedCard.status = destination.droppableId as IssueStatus;
 
       // add new card to the destination list
       destinationList.splice(destination.index, 0, movedCard);
@@ -122,12 +136,19 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
     }
 
     const sortedIssues = newOrderedData.sort((a, b) => a.order - b.order);
-    setIssues(newOrderedData, sortedIssues);
+    // const normalizedIssues = sortedIssues.map((issue) => ({
+    //   ...issue,
+    //   description: issue.description ?? null,
+    //   assigneeId: issue.assigneeId ?? null,
+    //   sprintId: issue.sprintId ?? null,
+    // }));
+
+    setIssues(sortedIssues);
 
     updateIssueOrderFn(sortedIssues);
   };
 
-  if (issuesError) return <div>Error loading issues</div>;
+  if (issuesError) return <div>Error loadin issues</div>;
   return (
     <>
       <div className="flex flex-col">
@@ -192,7 +213,7 @@ export default function SprintBoard({ sprints, projectId, orgId }) {
                                     onDelete={() =>
                                       fetchIssues(currentSprint.id)
                                     }
-                                    onUpdate={(updated) =>
+                                    onUpdate={(updated: Issue) =>
                                       setIssues((issues) =>
                                         issues?.map((issue) => {
                                           if (issue.id === updated.id)

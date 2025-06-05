@@ -15,8 +15,20 @@ import useFetch from "@/hooks/useFetch";
 import { updateSprintStatus } from "@/actions/sprints";
 import { useSearchParams, useRouter } from "next/navigation";
 import { BarLoader } from "react-spinners";
-
-const SprintManager = ({ sprint, setSprint, sprints, projectId }) => {
+import { Sprint } from "@/types/modelType";
+import { Dispatch, SetStateAction } from "react";
+type SprintManagerProps = {
+  sprint: Sprint;
+  setSprint: Dispatch<SetStateAction<Sprint>>;
+  sprints: Sprint[];
+  projectId: string;
+};
+const SprintManager = ({
+  sprint,
+  setSprint,
+  sprints,
+  projectId,
+}: SprintManagerProps) => {
   const [status, setStatus] = useState(sprint.status);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -27,25 +39,31 @@ const SprintManager = ({ sprint, setSprint, sprints, projectId }) => {
     isBefore(now, endDate) && isAfter(now, startDate) && status === "PLANNED";
 
   const canEnd = status === "ACTIVE";
+  type UpdateSprintStatusResult = {
+    success: boolean;
+    sprint?: Sprint; // sprint is optional because it won't exist on error
+  };
 
   const {
     fn: updateStatus,
     loading,
     error,
     data: updatedStatus,
-  } = useFetch(updateSprintStatus);
+  } = useFetch<UpdateSprintStatusResult>(updateSprintStatus, {
+    success: false,
+  });
 
   const handleStatusChange = async (newStatus: string) => {
     updateStatus(sprint.id, newStatus);
   };
-  const handleSprintChange = (value) => {
+  const handleSprintChange = (value: string) => {
     const selectedSprint = sprints.find((s) => s.id === value);
-
+    if (!selectedSprint) return;
     setSprint(selectedSprint);
     setStatus(selectedSprint.status);
   };
   useEffect(() => {
-    if (updatedStatus && updatedStatus.success) {
+    if (updatedStatus && updatedStatus.success && updatedStatus.sprint) {
       setStatus(updatedStatus.sprint.status);
       setSprint({
         ...sprint,
