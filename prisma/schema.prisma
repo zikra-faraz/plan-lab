@@ -4,6 +4,11 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+//Organization
+//  └── Projects
+//        └── Sprints
+//              └── Issues
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -17,27 +22,31 @@ datasource db {
 //npx prisma migrate dev to push it in database 
 
 model User {
-  id             String   @id @default(cuid())
-  clerkUserId    String   @unique
-  email          String   @unique
+  id             String             @id @default(cuid())
+  clerkUserId    String             @unique
+  email          String             @unique
   name           String?
   imageUrl       String?
-  createdIssues  Issue[]  @relation("Reporter")
-  assignedIssues Issue[]  @relation("Assignee")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  organizations  UserOrganization[]
+  createdIssues  Issue[]            @relation("Reporter")
+  assignedIssues Issue[]            @relation("Assignee")
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 }
 
+//This means a user knows all the organizations they belong to, along with their role and invitation status in each.
+
 model Project {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   name           String
   key            String
   description    String?
-  organizationId String // This will store the Clerk organization ID
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
   sprints        Sprint[]
   issues         Issue[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@unique([organizationId, key])
 }
@@ -74,6 +83,37 @@ model Issue {
   updatedAt   DateTime      @updatedAt
 
   @@index([status, order])
+}
+
+model Organization {
+  id        String             @id @default(cuid())
+  name      String
+  slug      String             @unique
+  projects  Project[]
+  members   UserOrganization[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model UserOrganization {
+  id             String       @id @default(cuid())
+  user           User         @relation(fields: [userId], references: [id])
+  userId         String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+  role           Role         @default(MEMBER)
+  invitedAt      DateTime?
+  joinedAt       DateTime?
+  inviteToken    String?      @unique
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([userId, organizationId])
+}
+
+enum Role {
+  ADMIN
+  MEMBER
 }
 
 enum SprintStatus {

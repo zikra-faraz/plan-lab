@@ -9,15 +9,14 @@ export default async function ProjectList({ orgId }: { orgId: string }) {
 
   if (projects.length === 0) {
     return (
-      <p>
-        No projects found.{" "}
+      <div className="ml-3 mt-4">
         <Link
-          className="underline underline-offset-2 text-blue-200"
+          className="px-3 py-2 border rounded bg-purple-600 text-white "
           href="/project/create"
         >
-          Create New.
+          Create New Project
         </Link>
-      </p>
+      </div>
     );
   }
 

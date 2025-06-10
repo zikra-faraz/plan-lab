@@ -3,7 +3,7 @@ import { createSprint } from "@/actions/sprints";
 import { sprintSchema } from "@/app/lib/validators";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { format, addDays } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +21,9 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Sprint } from "@/types/modelType";
 import { sprintSchemaType } from "@/app/lib/validators";
+import Link from "next/link";
+import { getUserOrganization } from "@/actions/Organization";
+import { da } from "date-fns/locale";
 
 export default function SprintCreationForm({
   projectTitle,
@@ -43,6 +46,11 @@ export default function SprintCreationForm({
     createSprint,
     {} as Sprint
   );
+  const {
+    loading: orgLoading,
+    fn: org,
+    data,
+  } = useFetch(getUserOrganization, null);
   // control is used when using third party  packags lik here reactt day picker
   const {
     register,
@@ -67,10 +75,19 @@ export default function SprintCreationForm({
     toast.success("sprint created successfully");
     router.refresh();
   };
+  useEffect(() => {
+    org();
+  }, []);
+
   return (
     <>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-5xl font-bold gradient-title">{projectTitle}</h1>
+      <div className="flex justify-between items-center mb-6 mt-5">
+        <Link
+          href={`/organization/${data?.organization?.slug}`}
+          className="text-5xl font-bold gradient-title"
+        >
+          {projectTitle} Project
+        </Link>
         <Button
           className={`z-10 ${
             !showForm ? "" : "bg-red-700 hover:bg-red-800 text-white"

@@ -21,7 +21,7 @@ const Header = async () => {
               <div className="flex items-center gap-1 ">
                 {" "}
                 <Image
-                  src={"/p.png"}
+                  src={"/plan.png"}
                   alt="Plan lab Logo"
                   width={50}
                   height={50}

@@ -1,4 +1,4 @@
-import { SprintStatus, IssueStatus, IssuePriority } from "@prisma/client";
+import { SprintStatus, IssueStatus, IssuePriority, Role } from "@prisma/client";
 
 export type User = {
   id: string;
@@ -6,33 +6,46 @@ export type User = {
   email: string;
   name: string | null;
   imageUrl: string | null;
-  createdAt: Date; // serialized from Prisma DateTime
+  organizations?: UserOrganization[]; // user memberships with roles
+  createdIssues?: Issue[];
+  assignedIssues?: Issue[];
+  createdAt: Date;
   updatedAt: Date;
 };
-// export type assignee = {
-//   id: string;
-//   clerkUserId: string;
-//   email: string;
-//   name: string;
-//   imageUrl: string;
-//   createdAt: Date;
-//   updatedAt: Date;
-// }
 
-export type Issue = {
+export type Organization = {
   id: string;
-  title: string;
+  name: string;
+  projects?: Project[];
+  members?: UserOrganization[];
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type UserOrganization = {
+  id: string;
+  userId: string;
+  organizationId: string;
+  role: Role;
+  invitedAt?: Date | null;
+  joinedAt?: Date | null;
+  inviteToken?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  user?: User;
+  organization?: Organization;
+};
+
+export type Project = {
+  id: string;
+  name: string;
+  key: string;
   description?: string | null;
-  status: IssueStatus; // or IssueStatus if you have enum types defined in TS
-  order: number;
-  priority: IssuePriority; // or IssuePriority enum in TS
-  assignee: User | null;
-  assigneeId?: string | null;
-  reporter: User;
-  reporterId: string;
-  projectId: string;
-  sprintId?: string | null;
-  createdAt: Date; // DateTime from Prisma is usually serialized as string in JSON
+  organizationId: string;
+  organization?: Organization;
+  sprints?: Sprint[];
+  issues?: Issue[];
+  createdAt: Date;
   updatedAt: Date;
 };
 
@@ -41,9 +54,29 @@ export type Sprint = {
   name: string;
   startDate: Date;
   endDate: Date;
-  status: SprintStatus; // or SprintStatus enum
+  status: SprintStatus;
   projectId: string;
+  project?: Project;
+  issues?: Issue[];
   createdAt: Date;
   updatedAt: Date;
-  issues?: Issue[]; // optional array of issues linked to sprint
+};
+
+export type Issue = {
+  id: string;
+  title: string;
+  description?: string | null;
+  status: IssueStatus;
+  order: number;
+  priority: IssuePriority;
+  assigneeId?: string | null;
+  assignee?: User | null;
+  reporterId: string;
+  reporter: User;
+  projectId: string;
+  project?: Project;
+  sprintId?: string | null;
+  sprint?: Sprint | null;
+  createdAt: Date;
+  updatedAt: Date;
 };

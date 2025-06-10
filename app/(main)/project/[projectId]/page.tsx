@@ -40,7 +40,7 @@ export default async function ProjectPage({
           </>
         ) : (
           <>
-            <div>Create a Sprint from button above</div>
+            <div></div>
           </>
         )}
         {/* sprint board */}

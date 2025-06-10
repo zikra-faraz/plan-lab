@@ -2,51 +2,49 @@
 import { db } from "@/lib/prisma";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { ProjectSchemaType } from "@/app/lib/validators";
+import { getUserOrganization } from "./Organization";
 
 export async function createProject(data: ProjectSchemaType) {
-  const { userId, orgId } = await auth();
+  const { userId } = await auth();
   if (!userId) {
     throw new Error("Unauthorized");
   }
+  const userOrg = await getUserOrganization();
 
-  if (!orgId) {
+  if (!userOrg) {
     throw new Error("No Organization Selected");
   }
-  // Check if the user is an admin of the organization
-  const { organizations } = await clerkClient();
-  const { data: membershipList } =
-    await organizations.getOrganizationMembershipList({
-      organizationId: orgId,
-    });
-  const userMembership = membershipList.find(
-    (membership) => membership?.publicUserData?.userId === userId
-  );
-  if (!userMembership || userMembership.role !== "org:admin") {
+
+  if (userOrg.role !== "ADMIN") {
     throw new Error("Only organization admins can create projects");
   }
+
   try {
     const project = await db.project.create({
       data: {
         name: data.name,
         key: data.key,
         description: data.description,
-        organizationId: orgId,
+        organizationId: userOrg.organization.id,
       },
     });
     return project;
   } catch (error) {
-    throw new Error("Error creating project: " + error);
+    throw new Error(
+      "Error creating project: " +
+        (error instanceof Error ? error.message : String(error))
+    );
   }
 }
 
 export async function getProject(projectId: string) {
   // console.log(projectId);
 
-  const { userId, orgId } = await auth();
-  if (!userId || !orgId) {
+  const { userId } = await auth();
+  if (!userId) {
     throw new Error("Unauthorized");
   }
-
+  const userOrg = await getUserOrganization();
   // Find user to verify existence
   const user = await db.user.findUnique({
     where: { clerkUserId: userId },
@@ -72,7 +70,7 @@ export async function getProject(projectId: string) {
   }
 
   // Verify project belongs to the organization
-  if (project.organizationId !== orgId) {
+  if (project.organizationId !== userOrg?.organization.id) {
     return null;
   }
 
@@ -80,12 +78,15 @@ export async function getProject(projectId: string) {
 }
 
 export async function deleteProject(projectId: string) {
-  const { userId, orgId, orgRole } = await auth();
+  const { userId } = await auth();
+  const userOrg = await getUserOrganization();
+  const orgId = userOrg?.organization.id;
+  const orgRole = userOrg?.role;
   if (!userId || !orgId) {
     throw new Error("Unauthorized");
   }
 
-  if (orgRole !== "org:admin") {
+  if (orgRole !== "ADMIN") {
     throw new Error("Only organization admins can delete projects");
   }
   const project = await db.project.findUnique({

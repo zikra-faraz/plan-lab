@@ -63,7 +63,7 @@ const IssueDetailDialog = ({
     error: updateError,
     fn: updateIssueFn,
     data: updated,
-  } = useFetch(updateIssue, {} as Issue);
+  } = useFetch(updateIssue, null);
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this issue?")) {
       deleteIssueFn(issue.id);

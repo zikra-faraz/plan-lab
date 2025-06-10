@@ -1,36 +1,17 @@
-"use client";
+// app/onboarding/page.tsx (Server Component)
 
-import { OrganizationList, useOrganization } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { getUserOrganization } from "@/actions/Organization";
+import { redirect } from "next/navigation";
+import OnboardingForm from "../OnboardingForm"; // Move your form to a client component
 
-import { BarLoader } from "react-spinners";
-export default function Onboarding() {
-  const { organization, isLoaded } = useOrganization();
-  const router = useRouter();
-  // const [isRedirecting, setIsRedirecting] = useState(false);
-  useEffect(() => {
-    if (organization) {
-      // setIsRedirecting(true);
-      router.push(`/organization/${organization.slug}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organization]);
-  // 🌀 Show spinner while redirecting
-  // if (isRedirecting) {
-  //   return <BarLoader className="mb-4" width={"100%"} color="#9333ea" />;
-  // }
-  if (isLoaded) {
-    return <BarLoader className="mb-4" width={"100%"} color="#9333ea" />;
+export default async function OnboardingPage() {
+  const organization = await getUserOrganization();
+  // console.log(organization);
+  // console.log("hello");
+
+  if (organization) {
+    redirect(`/organization/${organization.organization.slug}`);
   }
 
-  return (
-    <div className="flex justify-center items-center pt-14">
-      <OrganizationList
-        hidePersonal
-        afterCreateOrganizationUrl="/organization/:slug"
-        afterSelectOrganizationUrl="/organization/:slug"
-      />
-    </div>
-  );
+  return <OnboardingForm />;
 }

@@ -3,9 +3,12 @@ import { sprintSchemaType } from "@/app/lib/validators";
 import { db } from "@/lib/prisma";
 import { SprintStatus, IssueStatus, IssuePriority } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
+import { getUserOrganization } from "./Organization";
 
 export async function createSprint(projectId: string, data: sprintSchemaType) {
-  const { userId, orgId } = await auth();
+  const { userId } = await auth();
+  const userOrg = await getUserOrganization();
+  const orgId = userOrg?.organization?.id;
   if (!userId || !orgId) {
     throw new Error("Unauthorized");
   }
@@ -33,7 +36,10 @@ export async function updateSprintStatus(
   sprintId: string,
   newStatus: SprintStatus
 ) {
-  const { userId, orgId, orgRole } = await auth();
+  const { userId } = await auth();
+  const userOrg = await getUserOrganization();
+  const orgId = userOrg?.organization.id;
+  const orgRole = userOrg?.role;
   if (!userId || !orgId) {
     throw new Error("Unauthorized");
   }
@@ -42,13 +48,13 @@ export async function updateSprintStatus(
       where: { id: sprintId },
       include: { project: true },
     });
-    console.log(sprint, orgRole);
+    // console.log(sprint, orgRole);
     if (!sprint) throw new Error("Sprint not found");
 
     if (sprint.project.organizationId !== orgId) {
       throw new Error("Unauthorized");
     }
-    if (orgRole !== "org:admin") {
+    if (orgRole !== "ADMIN") {
       throw new Error("Only Admin can make this change");
     }
     const now = new Date();

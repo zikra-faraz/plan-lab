@@ -6,7 +6,8 @@ import useFetch from "@/hooks/useFetch";
 import { useOrganization } from "@clerk/nextjs";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+
+import { toast } from "sonner";
 
 export default function DeleteProject({ projectId }: { projectId: string }) {
   const { membership } = useOrganization();
@@ -22,13 +23,11 @@ export default function DeleteProject({ projectId }: { projectId: string }) {
     if (window.confirm("Are you sure you want to delete this project?")) {
       deleteProjectFn(projectId);
     }
-  };
-  useEffect(() => {
     if (deleted) {
+      toast.success("Project Deleted");
       router.refresh();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deleted]);
+  };
 
   if (!isAdmin) return null;
   return (
@@ -42,7 +41,7 @@ export default function DeleteProject({ projectId }: { projectId: string }) {
       >
         <Trash2 className="h-5 w-5 " />
       </Button>
-      {error && <p className="text-red-500 text-sm">{error.message}</p>}
+      {error && <p className="text-red-500 text-sm">{error}</p>}
     </>
   );
 }

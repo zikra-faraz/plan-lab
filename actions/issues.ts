@@ -3,6 +3,7 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { IssueStatus, IssuePriority } from "@prisma/client";
+import { getUserOrganization } from "./Organization";
 
 type CreateIssueData = {
   title: string;
@@ -22,7 +23,9 @@ type UpdateIssueData = {
   priority: IssuePriority;
 };
 export async function createIssue(projectId: string, data: CreateIssueData) {
-  const { userId, orgId } = await auth();
+  const { userId } = await auth();
+  const dataOrg = await getUserOrganization();
+  const orgId = dataOrg?.organizationId;
   if (!userId || !orgId) {
     throw new Error("Unauthorized");
   }
@@ -60,8 +63,9 @@ export async function createIssue(projectId: string, data: CreateIssueData) {
   return issue;
 }
 export async function getIssuesForSprint(sprintId: string) {
-  const { userId, orgId } = await auth();
-
+  const { userId } = await auth();
+  const data = await getUserOrganization();
+  const orgId = data?.organizationId;
   if (!userId || !orgId) {
     throw new Error("Unauthorized");
   }
@@ -84,8 +88,9 @@ export async function getIssuesForSprint(sprintId: string) {
 
 // Or any one fails, and everything is rolled back (like nothing ever happened).
 export async function updateIssueOrder(updatedIssues: UpdateIssueInput[]) {
-  const { userId, orgId } = await auth();
-
+  const { userId } = await auth();
+  const data = await getUserOrganization();
+  const orgId = data?.organizationId;
   if (!userId || !orgId) {
     throw new Error("Unauthorized");
   }
@@ -108,8 +113,9 @@ export async function updateIssueOrder(updatedIssues: UpdateIssueInput[]) {
 }
 
 export async function deleteIssue(issueId: string) {
-  const { userId, orgId } = await auth();
-
+  const { userId } = await auth();
+  const data = await getUserOrganization();
+  const orgId = data?.organizationId;
   if (!userId || !orgId) {
     throw new Error("Unauthorized");
   }
@@ -141,8 +147,9 @@ export async function deleteIssue(issueId: string) {
 }
 
 export async function updateIssue(issueId: string, data: UpdateIssueData) {
-  const { userId, orgId } = await auth();
-
+  const { userId } = await auth();
+  const dataOrg = await getUserOrganization();
+  const orgId = dataOrg?.organizationId;
   if (!userId || !orgId) {
     throw new Error("Unauthorized");
   }
@@ -183,7 +190,8 @@ export async function updateIssue(issueId: string, data: UpdateIssueData) {
 }
 
 export async function getUserIssues(userId: string) {
-  const { orgId } = await auth();
+  const data = await getUserOrganization();
+  const orgId = data?.organizationId;
   if (!userId || !orgId) {
     throw new Error("No user id or organization id found");
   }

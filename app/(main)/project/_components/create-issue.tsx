@@ -30,7 +30,7 @@ import { BarLoader } from "react-spinners";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
 import { Issue, IssuePriority } from "@prisma/client";
-import { User } from "@/types/modelType";
+
 type CreateIssueDrawerProps = {
   isOpen: boolean; // true or false for drawer open state
   onClose: () => void; // function to close drawer
@@ -72,12 +72,12 @@ const CreateIssueDrawer: React.FC<CreateIssueDrawerProps> = ({
     fn: createIssueFn,
     error,
     data: newIssue,
-  } = useFetch(createIssue, {} as Issue);
+  } = useFetch(createIssue, null);
   const {
     loading: usersLoading,
     fn: fetchUsers,
     data: users,
-  } = useFetch(getOrganizationUsers, [] as User[]);
+  } = useFetch(getOrganizationUsers, null);
   useEffect(() => {
     if (isOpen && orgId) {
       fetchUsers(orgId);
@@ -203,7 +203,7 @@ const CreateIssueDrawer: React.FC<CreateIssueDrawerProps> = ({
             )}
           </div>
 
-          {error && <p className="text-red-500 mt-2">{error.message}</p>}
+          {error && <p className="text-red-500 mt-2">{error}</p>}
           <Button
             type="submit"
             disabled={createIssueLoading}
