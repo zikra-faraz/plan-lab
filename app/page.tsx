@@ -42,8 +42,8 @@ export default function Home() {
             {/* Glass Box with Shooting Star */}
             <div className="relative z-10 backdrop-blur-xl bg-purple-50 dark:bg-white/5 border border-gray dark:border-white/10 rounded-3xl px-8 py-12 shadow-2xl overflow-hidden shooting-star-box">
               <p className="text-6xl sm:text-7xl font-bold tracking-tight text-purple-500">
-                Pl<span className="dark:text-white text-black">a</span>n{" "}
-                <span className="dark:text-white text-black">Lab</span>
+                Pl<span className=" text-black dark:text-white ">a</span>n{" "}
+                <span className="">Lab</span>
               </p>
             </div>
           </div>

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { projectSchema, ProjectSchemaType } from "@/app/lib/validators";
 import { createProject } from "@/actions/Project";
 import useFetch from "@/hooks/useFetch";
+import { useEffect } from "react";
 
 const CreateProject = ({ orgId }: { orgId: string }) => {
   const router = useRouter();
@@ -29,17 +30,16 @@ const CreateProject = ({ orgId }: { orgId: string }) => {
 
   const onSubmit = async (data: ProjectSchemaType) => {
     try {
-      await createProjectFn(data);
-
-      if (!createLoading && created) {
-        toast.success("Project created!");
-        router.push(`/project/${created?.id}`);
-      }
+      createProjectFn(data);
     } catch (error: any) {
       toast.error(error?.message || "Something went wrong");
     }
   };
-
+  useEffect(() => {
+    if (created) {
+      router.push(`/project/${created.id}`);
+    }
+  }, [createLoading]);
   //   console.log(created);
 
   if (!orgId) {
@@ -79,11 +79,7 @@ const CreateProject = ({ orgId }: { orgId: string }) => {
             <p className="text-red-500 text-sm">{errors.description.message}</p>
           )}
 
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-purple-600 text-white"
-          >
+          <Button type="submit" className="bg-purple-600 text-white">
             {createLoading ? "Creating..." : "Create Project"}
           </Button>
         </form>
