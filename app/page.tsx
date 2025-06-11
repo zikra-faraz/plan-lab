@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   ChevronRight,
@@ -24,8 +26,46 @@ import {
 import faqs from "@/data/faqs.json";
 import workflowSteps from "@/data/workFlowSteps.json";
 import features from "@/data/features";
+import { useEffect, useState } from "react";
+import { getProjectByOrgId, getUserOrganization } from "@/actions/Organization";
+import { useRouter } from "next/router";
+import { dark } from "@clerk/themes";
 
 export default function Home() {
+  const [userOrg, setUserOrg] = useState(null);
+  const [project, setProject] = useState(null);
+  useEffect(() => {
+    async function fetchUserOrg() {
+      try {
+        const data = await getUserOrganization();
+        if (data) {
+          setUserOrg(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user organization", error);
+      }
+    }
+    fetchUserOrg();
+  }, []);
+  // console.log(userOrg);
+
+  const isAdmin = userOrg?.role == "ADMIN";
+  const isMember = userOrg?.role == "MEMBER";
+  useEffect(() => {
+    if (isMember) {
+      async function ProjectId() {
+        const proj = await getProjectByOrgId(userOrg?.organizationId);
+
+        if (proj) {
+          setProject(proj);
+        }
+      }
+      ProjectId();
+    }
+  }, [isMember, userOrg]);
+
+  // console.log(project);
+
   return (
     <>
       <div className="min-h-screen">
@@ -56,17 +96,26 @@ export default function Home() {
               Get Started <ChevronRight size={18} className="ml-1" />
             </Button>
           </Link>
-          <Link href="#features">
-            <Button size="lg" variant="outline">
-              Learn More
-            </Button>
-          </Link>
+          {isMember && project ? (
+            <Link href={`/project/${project?.id}`}>
+              <Button size="lg" className="mr-4" variant="outline">
+                Go to Project <ChevronRight size={18} className="ml-1" />
+              </Button>
+            </Link>
+          ) : (
+            <Link href="#features">
+              <Button size="lg" variant="outline">
+                Learn More
+              </Button>
+            </Link>
+          )}
         </section>
         {/* Features Section */}
         <section id="features" className=" py-30 px-5">
           <div className="container mx-auto">
             <p className="text-3xl font-bold tracking-tight text-purple-500 mb-12 text-center">
-              Key <span className="dark:text-white text-black ">Features</span>{" "}
+              Key{" "}
+              <span className="dark:text-white text-black ">Features</span>{" "}
             </p>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {features.map((feature, index) => (

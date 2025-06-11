@@ -16,7 +16,7 @@ type props = {
   isAdmin: boolean;
 };
 
-const OrgSwitcher = ({ organization, isAdmin }: props) => {
+const UpdateOrgModel = ({ organization, isAdmin }: props) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { isLoaded: isUserLoaded } = useUser();
   const pathname = usePathname();
@@ -76,4 +76,4 @@ const OrgSwitcher = ({ organization, isAdmin }: props) => {
   );
 };
 
-export default OrgSwitcher;
+export default UpdateOrgModel;

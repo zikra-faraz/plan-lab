@@ -49,7 +49,7 @@ export default function SprintCreationForm({
   const {
     loading: orgLoading,
     fn: org,
-    data,
+    data: userOrg,
   } = useFetch(getUserOrganization, null);
   // control is used when using third party  packags lik here reactt day picker
   const {
@@ -82,12 +82,19 @@ export default function SprintCreationForm({
   return (
     <>
       <div className="flex justify-between items-center mb-6 mt-5">
-        <Link
-          href={`/organization/${data?.organization?.slug}`}
-          className="text-5xl font-bold gradient-title"
-        >
-          {projectTitle} Project
-        </Link>
+        {userOrg?.role === "ADMIN" && (
+          <Link
+            href={`/organization/${userOrg.organization.id}`}
+            className="gradient-title text-6xl font-bold"
+          >
+            {projectTitle} Project
+          </Link>
+        )}
+        {userOrg?.role === "MEMBER" && (
+          <Link href={`/`} className="gradient-title text-6xl font-bold">
+            {projectTitle} Project
+          </Link>
+        )}
         <Button
           className={`z-10 ${
             !showForm ? "" : "bg-red-700 hover:bg-red-800 text-white"

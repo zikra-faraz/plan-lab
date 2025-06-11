@@ -21,6 +21,9 @@ type Props = {
 };
 const UpdateOrg = ({ isOpen, onClose, organization, isAdmin }: Props) => {
   const [name, setName] = useState(organization.name);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteEmails, setInviteEmails] = useState<string[]>([]);
 
   const router = useRouter();
   const {

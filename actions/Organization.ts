@@ -25,6 +25,7 @@ export async function createOrganization(name: string) {
     await db.userOrganization.create({
       data: {
         userId: user.id,
+        email: user.email,
         organizationId: org.id,
         role: "ADMIN", // 👈 make creator an admin
       },
@@ -59,7 +60,7 @@ export const getUserOrganization = async () => {
   // console.log(userId);
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return null;
   }
 
   // Find user's membership
@@ -97,8 +98,17 @@ export const getUserOrganization = async () => {
     return null; // no org found
   }
 };
+export async function getProjectByOrgId(id: string) {
+  const proj = await db.project.findFirst({
+    where: {
+      organizationId: id,
+    },
+  });
+  if (!proj) return null;
 
-export async function getOrganization(slug: string) {
+  return proj;
+}
+export async function getOrganization(id: string) {
   const { userId } = await auth();
   if (!userId) {
     throw new Error("Unauthorized");
@@ -118,10 +128,8 @@ export async function getOrganization(slug: string) {
 
   if (!user) throw new Error("User not found");
 
-  // Check if user belongs to the organization with that slug
-  const membership = user.organizations.find(
-    (m) => m.organization.slug === slug
-  );
+  // Check if user belongs to the organization with that ID
+  const membership = user.organizations.find((m) => m.organization.id === id);
 
   if (!membership) return null;
 
@@ -213,9 +221,9 @@ export async function getOrganizationUsers(orgId: string) {
 
   // Optionally transform the result to just user + role
   const users = members.map((member) => ({
-    id: member.user.id,
-    name: member.user.name,
-    email: member.user.email,
+    id: member?.user?.id,
+    name: member?.user?.name,
+    email: member?.user?.email,
     role: member.role,
   }));
 

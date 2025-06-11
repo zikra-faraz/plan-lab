@@ -8,9 +8,12 @@ import Image from "next/image";
 import UserMenu from "@/components/user-menu";
 import { checkUser } from "@/lib/checkUser";
 import UserLoading from "./user-loading";
+import { getUserOrganization } from "@/actions/Organization";
 
 const Header = async () => {
   await checkUser();
+  const data = await getUserOrganization();
+  const isAdmin = data?.role == "ADMIN";
   return (
     <>
       <UserLoading />
@@ -34,14 +37,27 @@ const Header = async () => {
               </div>
             </Link>
             <div className="flex items-center gap-4">
-              <Link href="/project/create">
-                <Button className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500">
-                  <PenBox size={18} className="text-white" />
-                  <span className="hidden md:inline text-white">
-                    Create Project
-                  </span>
-                </Button>
-              </Link>
+              <div className="hidden md:block">
+                {isAdmin ? (
+                  <Link href="/project/create">
+                    <Button className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500">
+                      <PenBox size={18} className="text-white" />
+                      <span className="hidden md:inline text-white">
+                        Create Project
+                      </span>
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link href="/onboarding">
+                    <Button className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500">
+                      <PenBox size={18} className="text-white" />
+                      <span className="hidden md:inline text-white">
+                        New Organization
+                      </span>
+                    </Button>
+                  </Link>
+                )}
+              </div>
               <SignedOut>
                 <SignInButton forceRedirectUrl="/onboarding">
                   <Button variant="outline">Login</Button>

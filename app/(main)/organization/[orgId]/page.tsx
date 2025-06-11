@@ -2,9 +2,16 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 
 import { getOrganization, getUserOrganization } from "@/actions/Organization";
-import OrgSwitcher from "./_components/org-switcher";
+
 import ProjectList from "./_components/project-list";
 import UserIssues from "./_components/user-issues";
+import { Button } from "@/components/ui/button";
+import UpdateOrgModel from "./_components/update-org-model";
+import { InviteMemberForm } from "./_components/invite-member";
+import { useUser } from "@clerk/nextjs";
+import { checkUser } from "@/lib/checkUser";
+import InviteButton from "./_components/invite-button";
+
 export default async function Organization({
   params,
 }: {
@@ -12,10 +19,12 @@ export default async function Organization({
 }) {
   const { orgId } = await params;
   const { userId } = await auth();
+  const data = await checkUser();
   const response = await getOrganization(orgId);
   const userOrg = await getUserOrganization();
   const isAdmin = userOrg?.role == "ADMIN";
   // console.log(isAdmin);
+  // console.log(data);
 
   if (!response) {
     return (
@@ -24,6 +33,9 @@ export default async function Organization({
       </>
     );
   }
+  // if (!isAdmin) {
+  //   redirect(`/`); // or `/dashboard` or `/not-allowed`
+  // }
   return (
     <>
       <div className="container mt-5 mx-auto px-4">
@@ -34,7 +46,11 @@ export default async function Organization({
               Organization
             </h1>
           </div>
-          <OrgSwitcher organization={response} isAdmin={isAdmin} />
+          <div className="flex gap-2">
+            <InviteButton response={response} data={data} isAdmin={isAdmin} />
+            {/* <InviteButton /> */}
+            <UpdateOrgModel organization={response} isAdmin={isAdmin} />
+          </div>
         </div>
 
         <div className="mb-4 ">

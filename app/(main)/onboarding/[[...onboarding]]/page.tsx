@@ -8,9 +8,9 @@ export default async function OnboardingPage() {
   const organization = await getUserOrganization();
   // console.log(organization);
   // console.log("hello");
-
-  if (organization) {
-    redirect(`/organization/${organization.organization.slug}`);
+  const isAdmin = organization?.role == "ADMIN";
+  if (organization && isAdmin) {
+    redirect(`/organization/${organization.organization.id}`);
   }
 
   return <OnboardingForm />;
