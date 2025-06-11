@@ -9,7 +9,7 @@ export default async function OnboardingPage() {
   // console.log(organization);
   // console.log("hello");
   const isAdmin = organization?.role == "ADMIN";
-  if (organization && isAdmin) {
+  if (organization) {
     redirect(`/organization/${organization.organization.id}`);
   }
 

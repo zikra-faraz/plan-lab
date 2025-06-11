@@ -46,7 +46,7 @@ export default async function Organization({
               Organization
             </h1>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 ">
             <InviteButton response={response} data={data} isAdmin={isAdmin} />
             {/* <InviteButton /> */}
             <UpdateOrgModel organization={response} isAdmin={isAdmin} />
