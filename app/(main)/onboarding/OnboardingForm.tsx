@@ -28,7 +28,9 @@ export default function OnboardingForm() {
     try {
       const org = await createOrganization(values.name);
       toast.success("Organization created!");
-      router.push(`/organization/${org.slug}`);
+      console.log(org);
+
+      router.push(`/organization/${org?.id}`);
     } catch (error: any) {
       toast.error(error.message || "Something went wrong");
     }
