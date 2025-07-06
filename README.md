@@ -19,10 +19,6 @@ Plan Lab is an end-to-end Kanban-style project management app built using modern
 
 ---
 
-## 📸 Screenshots
-
-_(Optional – Add screenshots of your app UI here)_
-
 ---
 
 ## 🧪 Tech Stack
