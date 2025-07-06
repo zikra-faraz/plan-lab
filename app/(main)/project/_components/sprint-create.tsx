@@ -66,11 +66,12 @@ export default function SprintCreationForm({
     },
   });
   const onSubmit = async (data: sprintSchemaType) => {
-    await createSprintFn(projectId, {
+    const res = await createSprintFn(projectId, {
       ...data,
       startDate: dateRange.from,
       endDate: dateRange.to,
     });
+
     setShowForm(false);
     toast.success("sprint created successfully");
     router.refresh();
@@ -107,7 +108,7 @@ export default function SprintCreationForm({
 
       {showForm && (
         <>
-          <Card className="pt-4 mb-4">
+          <Card className="pt-4 mb-4 z-10">
             <CardContent>
               <form
                 onSubmit={handleSubmit(onSubmit)}
@@ -181,11 +182,7 @@ export default function SprintCreationForm({
                     )}
                   />
                 </div>
-                <Button
-                  type="submit"
-                  className="z-10"
-                  disabled={createSprintLoading}
-                >
+                <Button type="submit" disabled={createSprintLoading}>
                   {createSprintLoading ? "Creating..." : "Create Sprint"}
                 </Button>
               </form>

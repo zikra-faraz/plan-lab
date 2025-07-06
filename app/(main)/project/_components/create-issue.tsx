@@ -99,6 +99,7 @@ const CreateIssueDrawer: React.FC<CreateIssueDrawerProps> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newIssue, createIssueLoading]);
+
   return (
     <Drawer open={isOpen} onClose={onClose}>
       <DrawerContent>

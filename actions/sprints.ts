@@ -18,6 +18,7 @@ export async function createSprint(projectId: string, data: sprintSchemaType) {
   if (!project || project.organizationId !== orgId) {
     throw new Error("Project not found");
   }
+  // ✅ Check if sprint name already exists
 
   const sprint = await db.sprint.create({
     data: {
